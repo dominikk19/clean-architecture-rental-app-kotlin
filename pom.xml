@@ -16,11 +16,38 @@
     <properties>
         <java.version>17</java.version>
         <kotlin.version>1.8.22</kotlin.version>
+        <sortpom.version>3.3.0</sortpom.version>
+        <spock.version>2.4-M1-groovy-4.0</spock.version>
+        <kotlin-logging-jvm.version>3.0.5</kotlin-logging-jvm.version>
+        <kotlin-maven-noarg.version>1.9.10</kotlin-maven-noarg.version>
+        <liquibase-core.version>4.24.0</liquibase-core.version>
+        <archunit-junit5.version>1.1.0</archunit-junit5.version>
+        <gmavenplus-plugin.version>3.0.2</gmavenplus-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-surefire-plugin.version>3.2.1</maven-surefire-plugin.version>
+        <skip.unit.tests>false</skip.unit.tests>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.spockframework</groupId>
+                <artifactId>spock-bom</artifactId>
+                <version>${spock.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -34,17 +61,50 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ekryd.sortpom</groupId>
+            <artifactId>sortpom-maven-plugin</artifactId>
+            <version>${sortpom.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.microutils</groupId>
+            <artifactId>kotlin-logging-jvm</artifactId>
+            <version>${kotlin-logging-jvm.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit5</artifactId>
+            <version>${archunit-junit5.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -59,6 +119,7 @@
                     </args>
                     <compilerPlugins>
                         <plugin>spring</plugin>
+                        <plugin>jpa</plugin>
                     </compilerPlugins>
                 </configuration>
                 <dependencies>
@@ -67,7 +128,109 @@
                         <artifactId>kotlin-maven-allopen</artifactId>
                         <version>${kotlin.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-noarg</artifactId>
+                        <version>${kotlin-maven-noarg.version}</version>
+                    </dependency>
                 </dependencies>
+            </plugin>
+
+            <!-- Groovy compiler for spock tests-->
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>${gmavenplus-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>unit-testCompile</id>
+                        <goals>
+                            <goal>compileTests</goal>
+                        </goals>
+                        <phase>test-compile</phase>
+                        <configuration>
+                            <testOutputDirectory>${basedir}/target/test-classes</testOutputDirectory>
+                            <testSources>
+                                <testSource>
+                                    <directory>${project.basedir}/src/test/groovy</directory>
+                                    <include>**/*.groovy</include>
+                                </testSource>
+                            </testSources>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>integration-testCompile</id>
+                        <goals>
+                            <goal>compileTests</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <testOutputDirectory>${basedir}/target/integration-test-classes</testOutputDirectory>
+                            <testSources>
+                                <testSource>
+                                    <directory>${project.basedir}/src/integration-test/groovy</directory>
+                                    <include>**/*.groovy</include>
+                                </testSource>
+                            </testSources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Configuration for separation of integration tests from unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${maven-resources-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>default-testResources</id>
+                        <goals>
+                            <goal>testResources</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/test-classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/test/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>add-integration-test-resources</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/integration-test-classes</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/src/integration-test/resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <testClassesDirectory>${basedir}/target/test-class</testClassesDirectory>
+                    <testSourceDirectory>${basedir}/src/test/groovy</testSourceDirectory>
+                    <includes>
+                        <include>**/*.groovy</include>
+                    </includes>
+                    <testFailureIgnore>false</testFailureIgnore>
+                    <skipTests>${skip.unit.tests}</skipTests>
+                </configuration>
             </plugin>
         </plugins>
     </build>

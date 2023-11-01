@@ -1,4 +1,4 @@
-package pl.dkiszka.cleanarchitecturerentalappkotlin
+package pl.dkiszka
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
