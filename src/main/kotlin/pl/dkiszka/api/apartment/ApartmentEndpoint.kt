@@ -16,7 +16,7 @@ import pl.dkiszka.domain.apartment.ApartmentId
 import pl.dkiszka.domain.apartment.ApartmentQueryRepository
 
 @RestController
-@RequestMapping("/apartment")
+@RequestMapping("/api/v1/apartment")
 private class ApartmentEndpoint(
     private val createApartment: CreateApartment,
     private val apartmentQueryRepository: ApartmentQueryRepository,

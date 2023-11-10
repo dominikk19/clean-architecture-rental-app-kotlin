@@ -15,7 +15,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="APARTMENT_ID" type="UUID">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="OWNER_ID" type="VARCHAR(50)"/>
             <column name="DESCRIPTION" type="VARCHAR(150)"/>
@@ -26,6 +26,8 @@
             <column name="CITY" type="VARCHAR(50)"/>
             <column name="COUNTRY" type="VARCHAR(50)"/>
         </createTable>
+        <addPrimaryKey tableName="APARTMENT" columnNames="ID" constraintName="PK_APARTMENT"/>
+        <createSequence sequenceName="APARTMENT_SEQ_ID" minValue="1" incrementBy="1"/>
     </changeSet>
 
 
