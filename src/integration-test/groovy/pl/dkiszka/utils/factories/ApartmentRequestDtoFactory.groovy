@@ -21,7 +21,7 @@ class ApartmentRequestDtoFactory {
                 "some_city",
                 "some_country",
                 "some_description",
-                Map.of()
+                Map.of("Day Room", Double.valueOf(25))
         )
     }
 

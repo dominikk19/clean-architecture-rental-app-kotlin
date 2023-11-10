@@ -37,7 +37,7 @@ private class ApartmentEndpoint(
         @PathVariable("apartmentId") apartmentId: String,
     ): GetApartmentResponseDto {
         return GetApartmentResponseDto.from(
-            apartment = apartmentQueryRepository.getByApartmentId(ApartmentId(apartmentId))
+            agreementView = apartmentQueryRepository.getByApartmentId(ApartmentId(apartmentId))
         )
     }
 

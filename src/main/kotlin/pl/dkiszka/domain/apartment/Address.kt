@@ -6,15 +6,15 @@ import jakarta.persistence.Embeddable
 @Embeddable
 data class Address(
     @Column(name = "STREET")
-    val street: String,
+    override val street: String,
     @Column(name = "POSTAL_CODE")
-    val postalCode: String,
+    override val postalCode: String,
     @Column(name = "HOUSE_NUMBER")
-    val houseNumber: String,
+    override val houseNumber: String,
     @Column(name = "APARTMENT_NUMBER")
-    val apartmentNumber: String?,
+    override val apartmentNumber: String?,
     @Column(name = "CITY")
-    val city: String,
+    override val city: String,
     @Column(name = "COUNTRY")
-    val country: String,
-)
+    override val country: String,
+) : AddressView

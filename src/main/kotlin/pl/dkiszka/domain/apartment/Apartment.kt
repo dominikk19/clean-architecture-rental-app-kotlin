@@ -1,8 +1,11 @@
 package pl.dkiszka.domain.apartment
 
+import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
+import jakarta.persistence.ElementCollection
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import pl.dkiszka.domain.shared.BaseEntity
@@ -13,12 +16,15 @@ import java.time.Clock
 @Table(name = "APARTMENT")
 @SequenceGenerator(name = ENTITY_GENERATOR_NAME, sequenceName = "APARTMENT_SEQ_ID", allocationSize = 1)
 class Apartment private constructor(
-    @Column(name = "OWNER_ID")
-    override val ownerId: String,
     @Embedded
-    val address: Address,
+    override val ownerId: OwnerId,
+    @Embedded
+    override val address: Address,
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "ROOM")
+    override val rooms: Set<Room> = mutableSetOf(),
     @Column(name = "DESCRIPTION")
-    val description: String?,
+    override val description: String?,
     clock: Clock
 ) : BaseEntity(clock), ApartmentView {
 
@@ -29,11 +35,13 @@ class Apartment private constructor(
         fun create(
             ownerId: String,
             address: Address,
+            rooms: Set<Room>,
             description: String?,
             clock: Clock,
         ) = Apartment(
-            ownerId = ownerId,
+            ownerId = OwnerId(ownerId),
             address = address,
+            rooms = rooms,
             description = description,
             clock = clock,
         )

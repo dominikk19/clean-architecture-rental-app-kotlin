@@ -7,6 +7,7 @@ import pl.dkiszka.domain.apartment.Address
 import pl.dkiszka.domain.apartment.Apartment
 import pl.dkiszka.domain.apartment.ApartmentId
 import pl.dkiszka.domain.apartment.ApartmentRepository
+import pl.dkiszka.domain.apartment.Room
 import pl.dkiszka.domain.shared.ClockProvider
 
 
@@ -28,6 +29,12 @@ private class CreateApartmentHandler(
                 country = command.country,
             ),
             description = command.description,
+            rooms = command.roomsDefinition.map {
+                Room.from(
+                    name = it.key,
+                    size = it.value,
+                )
+            }.toSet(),
             clock = clockProvider.get()
         )
         val savedApartment = apartmentRepository.save(newApartment)
